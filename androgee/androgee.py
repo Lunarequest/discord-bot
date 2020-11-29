@@ -11,7 +11,7 @@ bot = commands.Bot(command_prefix=os.environ["DISCORD_PREFIX"])
 
 @bot.event
 async def on_ready():
-    print("We is logged in as {0.user}".format(bot))
+    print(f"We is logged in as {bot.user}")
 
 
 @bot.command(name="spray")
