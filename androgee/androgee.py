@@ -7,6 +7,7 @@ from discord.ext import commands
 
 logging.basicConfig(level=logging.WARNING)
 bot = commands.Bot(command_prefix=os.environ["DISCORD_PREFIX"])
+mod_role_id = os.environ["mod_role_id"]
 
 
 @bot.event
@@ -14,13 +15,13 @@ async def on_ready():
     print(f"We is logged in as {bot.user}")
 
 
-@bot.command(name="spray")
+@bot.command(name="spray", aliases=["spritzered"])
 async def spray(ctx, member: discord.Member = None):
     image = get_image(ctx)
     if member == None:
         await ctx.send(file=image)
     else:
-        message = f"{member.mention} was sprayed by {ctx.message.author.mention}"
+        message = f"{member.mention} was sprirzered by {ctx.message.author.mention}"
         await ctx.send(message, file=image)
 
 
@@ -32,6 +33,51 @@ async def spray(ctx, member: discord.Member = None):
     else:
         message = f"{member.mention} was bonked by {ctx.message.author.mention}"
         await ctx.send(message, file=image)
+
+
+@bot.command(name="kick")
+async def kick(ctx, member: discord.Member, *, reason=None):
+    if mod_role_id in [y.id for y in ctx.author.roles]:
+        await member.kick(reason=reason)
+    else:
+        await ctx.send("you are not a moderator")
+
+
+@bot.command(name="ban")
+async def ban(ctx, member: discord.Member, *, reason=None):
+    if mod_role_id in [y.id for y in ctx.author.roles]:
+        await member.ban(reason=reason)
+    else:
+        await ctx.send("you are not a moderator")
+
+
+@bot.command(name="unban")
+async def unban(ctx, *, member):
+    if mod_role_id in [y.id for y in ctx.author.roles]:
+        banned_users = await ctx.guild.bans()
+        member_name, member_discriminator = member.split("#")
+        for ban_entery in banned_users:
+            user = ban_entery.user
+            if (user.name, user.discriminator) == (member_name, member_discriminator):
+                await ctx.guild.unbans(user)
+                await ctx.send(f"unbanned {user.name}#{user.discriminator}")
+    else:
+        await ctx.send("you are not a moderator")
+
+
+@bot.command(name="purge", alias="clear")
+async def purge(ctx, ammount=5):
+    ammount = ammount + 1
+    if mod_role_id in [y.id for y in ctx.author.roles]:
+        await ctx.channel.purge(limit=ammount)
+
+
+@bot.command(name="source")
+async def source(ctx):
+    message = (
+        f"{ctx.author.mention} the source is at https://github.com/Egeeio/androgee"
+    )
+    await ctx.send(message)
 
 
 def get_image(ctx):
