@@ -72,7 +72,7 @@ async def purge(ctx, ammount=5):
         await ctx.channel.purge(limit=ammount)
 
 
-@bot.command(name="source")
+@bot.command(name="source", alias="sauce")
 async def source(ctx):
     message = f"{ctx.author.mention} the source is at https://github.com/advaithm/discord-bot/tree/nekos-bot"
     await ctx.send(message)
