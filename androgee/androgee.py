@@ -8,6 +8,8 @@ from discord.ext import commands
 logging.basicConfig(level=logging.WARNING)
 bot = commands.Bot(command_prefix=os.environ["DISCORD_PREFIX"])
 mod_role_id = os.environ["mod_role_id"]
+mod_role_name = os.environ["mod_role_name"]
+mod_deined_message = "you are not a moderator"
 
 
 @bot.event
@@ -36,19 +38,21 @@ async def spray(ctx, member: discord.Member = None):
 
 
 @bot.command(name="kick")
+@commands.has_any_role(mod_role_id, mod_role_name)
 async def kick(ctx, member: discord.Member, *, reason=None):
-    if mod_role_id in [y.id for y in ctx.author.roles]:
+    try:
         await member.kick(reason=reason)
-    else:
-        await ctx.send("you are not a moderator")
+    except commands.MissingRole:
+        await ctx.send(mod_deined_message)
 
 
 @bot.command(name="ban")
+@commands.has_any_role(mod_role_id, mod_role_name)
 async def ban(ctx, member: discord.Member, *, reason=None):
-    if mod_role_id in [y.id for y in ctx.author.roles]:
+    try:
         await member.ban(reason=reason)
-    else:
-        await ctx.send("you are not a moderator")
+    except commands.MissingRole:
+        await ctx.send(mod_deined_message)
 
 
 @bot.command(name="unban")
