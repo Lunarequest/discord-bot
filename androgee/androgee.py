@@ -9,6 +9,7 @@ logging.basicConfig(level=logging.WARNING)
 bot = commands.Bot(command_prefix=os.environ["DISCORD_PREFIX"])
 mod_role_id = os.environ["mod_role_id"]
 mod_role_name = os.environ["mod_role_name"]
+print(mod_role_id, mod_role_name)
 mod_deined_message = "you are not a moderator"
 
 
@@ -56,8 +57,9 @@ async def ban(ctx, member: discord.Member, *, reason=None):
 
 
 @bot.command(name="unban")
+@commands.has_any_role(mod_role_id, mod_role_name)
 async def unban(ctx, *, member):
-    if mod_role_id in [y.id for y in ctx.author.roles]:
+    try:
         banned_users = await ctx.guild.bans()
         member_name, member_discriminator = member.split("#")
         for ban_entery in banned_users:
@@ -65,15 +67,18 @@ async def unban(ctx, *, member):
             if (user.name, user.discriminator) == (member_name, member_discriminator):
                 await ctx.guild.unbans(user)
                 await ctx.send(f"unbanned {user.name}#{user.discriminator}")
-    else:
-        await ctx.send("you are not a moderator")
+    except commands.MissingRole:
+        await ctx.send(mod_deined_message)
 
 
 @bot.command(name="purge", aliases=["clear"])
 async def purge(ctx, ammount=5):
-    ammount = ammount + 1
-    if mod_role_id in [y.id for y in ctx.author.roles]:
+    try:
+        ammount = ammount + 1
         await ctx.channel.purge(limit=ammount)
+    except commands.MissingRole:
+
+        await ctx.send(mod_deined_message)
 
 
 @bot.command(name="source", aliases=["sauce"])
