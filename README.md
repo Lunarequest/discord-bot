@@ -9,6 +9,7 @@ To run:
     - `DISCORD_TOKEN`
     - `mod_role_id`
     - `mod_role_name`
+    - `motd_channel`
 * do `poetry install`
 * and then `poetry run start`
 

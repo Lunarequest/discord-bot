@@ -3,6 +3,7 @@ import sys
 import random
 import logging
 import json
+import asyncio
 import discord
 from discord.ext import commands
 from pathlib import (
@@ -22,6 +23,7 @@ if os.path.exists(".env"):
 try:
     mod_role_id = os.environ["mod_role_id"]
     mod_role_name = os.environ["mod_role_name"]
+    MOTD_CHANNEL = os.environ["motd_channel"]
     COMMAND_PREFIX = os.environ["DISCORD_PREFIX"]
     BOT_TOKEN = os.environ["DISCORD_TOKEN"]
 except KeyError as e:
@@ -121,6 +123,19 @@ class Androgee(commands.Cog):
         return False
 
 
+async def motd():
+    await bot.wait_until_ready()
+    with open("motd_messages.txt") as f:
+        motd_message = random.choice(f.read().split())
+        channel = bot.get_channel(int(MOTD_CHANNEL))
+        last_motd = channel.history(limit=1).flatten()
+        while motd_message == last_motd.content:
+            motd_message = random.choice(f.read().split())
+        await channel.send(motd_message)
+    f.close()
+    asyncio.sleep(43200)
+
 def start():
     bot.add_cog(Androgee(bot))
+    bot.loop.create_task(motd())
     bot.run(BOT_TOKEN)
