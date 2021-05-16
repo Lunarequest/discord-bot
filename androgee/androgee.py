@@ -1,8 +1,8 @@
 import random
 import logging
 import discord
-import asyncio
 from discord.ext import typed_commands as commands
+from discord.ext import tasks
 from pathlib import (
     Path,
 )
@@ -57,21 +57,22 @@ async def source(ctx):
     await ctx.send(message)
 
 
+@tasks.loop(hours=12)
 async def motd():
     await bot.wait_until_ready()
     with open("motd_messages.txt") as f:
-        motd_message = random.choice(f.read().split())
+        motd_message = random.choice(f.read().split("\n"))
         channel = bot.get_channel(int(MOTD_CHANNEL))
-        last_motd = channel.history(limit=1).flatten()
-        while motd_message == last_motd.content:
-            motd_message = random.choice(f.read().split())
+        last_motd = await channel.history(limit=1).flatten()
+        while motd_message == last_motd[0].content:
+            motd_message = random.choice(f.read().split("\n"))
         await channel.send(motd_message)
     f.close()
-    asyncio.sleep(43200)
 
 
 def start():
     bot.add_cog(BadWords(bot))
+    bot.loop.create_task(motd())
     bot.run(BOT_TOKEN)
 
 

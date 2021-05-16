@@ -45,6 +45,7 @@ exclude = '''
   | .env
   | media
   | __pycache__
+  | motd_messages.txt
 )/
 '''
 
